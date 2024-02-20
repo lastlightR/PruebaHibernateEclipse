@@ -8,6 +8,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
 
 public class HibernateEnterprise {
 	
@@ -92,12 +93,22 @@ public class HibernateEnterprise {
 			System.out.println("-------------------------------------------");
 			
 			transaction = session.beginTransaction();
-			producto = (Productos) session.load(Productos.class, id);
+			
+			//different way to establish a query
+			Query<Productos> query = session.createQuery("FROM Productos WHERE id = " + id);
+			producto = query.uniqueResult();
+			
 			transaction.commit();
 			
 			//showing product's info with the ID given
-			System.out.println("ID: " + id + "\tName: " + producto.getNombre() + "\tPrice: " + producto.getPrecio());
-			System.out.println("-------------------------------------------");
+			if (producto != null) {
+				System.out.println("ID: " + id + "\tName: " + producto.getNombre() + "\tPrice: " + producto.getPrecio());
+				System.out.println("-------------------------------------------");
+			}
+			else {
+				System.out.println("Product not found.");
+				System.out.println("-------------------------------------------");
+			}
 		} catch (ObjectNotFoundException ex) {
 			if (transaction != null) {
 				System.out.println("Product not found. Error: " + ex);
@@ -116,7 +127,7 @@ public class HibernateEnterprise {
 		return producto;
 	}
 	
-	public void deleteProductBtId(int id) {
+	public void deleteProductById(int id) {
 		Session session = sf.openSession();
 		Transaction transaction = null;
 		Productos producto = new Productos();
@@ -152,7 +163,7 @@ public class HibernateEnterprise {
 		}
 	}
 	
-	public void updateProductBtId(int id, String newName, double newPrice) {
+	public void updateProductById(int id, String newName, double newPrice) {
 		Session session = sf.openSession();
 		Transaction transaction = null;
 		Productos producto = new Productos();
@@ -191,5 +202,116 @@ public class HibernateEnterprise {
 			session.close();
 		}
 	}
+	
+	//method that shows all products with a text in the name
+		public void showProductsByName(String text) {
+			
+			Session session = sf.openSession();
+			Transaction transaction = null;
+			boolean products_found = false;
+			
+			try {
+				transaction = session.beginTransaction();
+				//creates a list with all the products via SQL query
+				List products = session.createQuery("FROM Productos WHERE nombre LIKE '%" + text + "%'").list();
+				
+				Iterator iterator = products.iterator();
+				System.out.println("Looking for products...");
+				System.out.println("-------------------------------------------");
+				
+				while(iterator.hasNext()) { //showing products row by row
+					Productos producto = (Productos) iterator.next();
+					System.out.println("ID: " + producto.getId() + "\tName: " + producto.getNombre()
+							+ "\tPrice: " + producto.getPrecio());
+					System.out.println("-------------------------------------------");
+					products_found = true;
+				}
+				transaction.commit();
+				if (products_found) {
+					System.out.println("Finished searching for products with " + text + " in the name.");
+					System.out.println("-------------------------------------------");
+				}
+				else {
+					System.out.println("Found no products with " + text + " in the name.");
+					System.out.println("-------------------------------------------");
+				}
+			} catch (HibernateException ex) {
+				if (transaction != null)
+					transaction.rollback();
+				ex.printStackTrace();
+			} finally {
+				session.close();
+			}
+		}
+	
+		public void showProductsOrderedByPrice() {
+			Session session = sf.openSession();
+			Transaction transaction = null;
+			
+			try {
+				transaction = session.beginTransaction();
+				//creates a list with all the products via HQL query
+				List all_products = session.createQuery("FROM Productos ORDER BY precio ASC").list();
+				
+				Iterator iterator = all_products.iterator();
+				System.out.println("Showing products ordered by price...");
+				System.out.println("-------------------------------------------");
+				
+				while(iterator.hasNext()) { //showing products row by row
+					Productos producto = (Productos) iterator.next();
+					System.out.println("ID: " + producto.getId() + "\tName: " + producto.getNombre()
+							+ "\tPrice: " + producto.getPrecio());
+					System.out.println("-------------------------------------------");
+				}
+				transaction.commit();
+				System.out.println("Finished searching for products.");
+				System.out.println("-------------------------------------------");
+			} catch (HibernateException ex) {
+				if (transaction != null)
+					transaction.rollback();
+				ex.printStackTrace();
+			} finally {
+				session.close();
+			}
+		}
+	
+		public void showPriceByName(String name) {
+			Session session = sf.openSession();
+			Transaction transaction = null;
+			boolean products_found = false;
+			
+			try {
+				transaction = session.beginTransaction();
+				//creates a list with all the products via HQL query
+				List all_products = session.createQuery("FROM Productos WHERE nombre = '" + name + "'").list();
+				
+				Iterator iterator = all_products.iterator();
+				System.out.println("Showing price of products with name: " + name + "...");
+				System.out.println("-------------------------------------------");
+				
+				while(iterator.hasNext()) { //showing products row by row
+					Productos producto = (Productos) iterator.next();
+					System.out.println("ID: " + producto.getId()
+							+ "\tPrice: " + producto.getPrecio());
+					System.out.println("-------------------------------------------");
+					products_found = true;
+				}
+				transaction.commit();
+				if (products_found) {
+					System.out.println("Finished searching for products.");
+					System.out.println("-------------------------------------------");
+				}
+				else {
+					System.out.println("Found no products.");
+					System.out.println("-------------------------------------------");
+				}
+			} catch (HibernateException ex) {
+				if (transaction != null)
+					transaction.rollback();
+				ex.printStackTrace();
+			} finally {
+				session.close();
+			}
+		}
 
 }
