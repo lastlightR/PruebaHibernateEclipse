@@ -3,10 +3,6 @@ package hibernate.hibernate;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 
-/**
- * Hello world!
- *
- */
 public class UseHibernateEnterprise 
 {
     public static void main( String[] args )
