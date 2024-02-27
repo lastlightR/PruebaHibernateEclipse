@@ -41,7 +41,7 @@ public class HibernateEnterprise {
 					+ name + ", " + price + ".");
 			System.out.println("-------------------------------------------");
 			transaction = session.beginTransaction();
-			session.merge(producto); //inserting producto into table Productos
+			session.persist(producto); //inserting producto into table Productos
 			transaction.commit();
 		} catch (Exception ex) {
 			if (transaction != null)
@@ -184,7 +184,7 @@ public class HibernateEnterprise {
 				
 				producto.setNombre(newName); //setting the new values for producto
 				producto.setPrecio(newPrice);
-				session.persist(producto); //updates the values
+				session.merge(producto); //updates the values
 				transaction.commit();
 				
 				System.out.println("Product updated.");

@@ -74,7 +74,7 @@ public class ClientesEnterprise {
 					+ name + ", " + country + ".");
 			System.out.println("-------------------------------------------");
 			transaction = session.beginTransaction();
-			session.merge(cliente); //inserting cliente into table Clientes
+			session.persist(cliente); //inserting cliente into table Clientes
 			transaction.commit();
 		} catch (Exception ex) {
 			if (transaction != null)
@@ -165,7 +165,7 @@ public class ClientesEnterprise {
 					System.out.println("No new values introduced.");
 				System.out.println("-------------------------------------------");
 
-				session.persist(cliente); //updates the values
+				session.merge(cliente); //updates the values
 				transaction.commit();
 
 			}
